@@ -6,7 +6,8 @@ void GeneticAlgorithm::algorithm()
 {
 	//generate new population
 	population = new Population(populationSize, matrix);
-	
+	//population->print();
+
 	for (int k = 0; k < generations; k++) {
 		population->evaluation();
 		population->selection();
@@ -15,7 +16,7 @@ void GeneticAlgorithm::algorithm()
 		population->succesion();
 	}
 	bestIndividual = new Individual(population->getBestIndividual());
-
+	population->print();
 }
 
 void GeneticAlgorithm::showResult()

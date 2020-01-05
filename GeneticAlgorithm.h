@@ -4,8 +4,8 @@ class GeneticAlgorithm
 {
 	Individual* bestIndividual;
 
-	int populationSize = 20;
-	int generations = 20'000;
+	int populationSize = 40;
+	int generations = 100;
 	Matrix* matrix;
 	Population* population;
 

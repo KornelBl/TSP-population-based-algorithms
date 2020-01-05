@@ -1,24 +1,30 @@
 #pragma once
 #include "Individual.h"
+#include "CrossoverOperator.h"
 #include <math.h>
 
 class Population
 {
-	double crossProbability = 0.70;
-	double mutationProbability = 0.05;
+	double crossProbability = 0.75;
+	double mutationProbability = 0.02;
 
 	Individual* bestIndividual;
-
+	CrossoverOperator* crosser;
+	
 	int size;
 	int individualSize;
 	Matrix* matrix;
 	Individual** main;
 	Individual** next;
 	Individual** matingPool;
-	double* fitness = NULL;
+	double* fitness;
 	
+	void generateRandomPopulation();
+	void generateNNPopulation();
+
 
 public:
+	void print();
 	void evaluation();
 	void selection();
 	void crossover();

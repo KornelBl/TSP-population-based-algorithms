@@ -8,6 +8,7 @@
 int main()
 {
 	//dodac destruktory
+	srand(time(NULL));
 	Matrix* matrix = new Matrix;
 	matrix->readFromFile("data17.txt");
 	GeneticAlgorithm ga(matrix);

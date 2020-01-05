@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Individual.h"
 
 
@@ -16,7 +16,6 @@ void Individual::generateRandom(Matrix* m)
 	cost = 0;
 
 	//losowa droga startowa
-	srand(time(NULL));
 	int* helper = new int[size - 1];
 	for (int i = 0; i < size - 1; i++) {
 		helper[i] = i + 1;
@@ -36,6 +35,15 @@ void Individual::generateRandom(Matrix* m)
 int Individual::getCost()
 {
 	return cost;
+}
+
+void Individual::print()
+{
+	std::cout << "sciezka: ";
+	for (int i = 0; i < size; i++) {
+		std::cout << path[i] << "->";
+	}
+	std::cout << "0\nKoszt: " << cost << std::endl;
 }
 
 Individual::Individual(Matrix* m)
