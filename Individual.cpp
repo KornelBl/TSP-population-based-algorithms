@@ -43,7 +43,8 @@ void Individual::print()
 	for (int i = 0; i < size; i++) {
 		std::cout << path[i] << "->";
 	}
-	std::cout << "0\nKoszt: " << cost << std::endl;
+	std::cout << path[size];
+	std::cout << "\nKoszt: " << cost << std::endl;
 }
 
 Individual::Individual(Matrix* m)

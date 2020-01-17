@@ -4,8 +4,7 @@
 
 void GeneticAlgorithm::algorithm()
 {
-	//generate new population
-	population = new Population(populationSize, matrix);
+
 	//population->print();
 
 	for (int k = 0; k < generations; k++) {
@@ -16,7 +15,7 @@ void GeneticAlgorithm::algorithm()
 		population->succesion();
 	}
 	bestIndividual = new Individual(population->getBestIndividual());
-	population->print();
+	//population->print();
 }
 
 void GeneticAlgorithm::showResult()
@@ -28,9 +27,12 @@ void GeneticAlgorithm::showResult()
 	std::cout << "0\nKoszt: " << bestIndividual->getCost() << std::endl;
 }
 
-GeneticAlgorithm::GeneticAlgorithm(Matrix* m)
+GeneticAlgorithm::GeneticAlgorithm(Matrix* m, int populationSize, int eliteSize, int generations, double crossProbability, double mutationProbability, CrossoverOperator* crosser)
 {
 	matrix = m;
+	this->generations = generations;
+	//generate new population
+	population = new Population(matrix,populationSize,eliteSize,crossProbability,mutationProbability, crosser);
 }
 
 

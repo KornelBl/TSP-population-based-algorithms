@@ -151,14 +151,13 @@ void Population::evaluation()
 void Population::selection()
 {
 	//roulette
-	srand(time(NULL));
 	double* thresholds = new double[size];
 	thresholds[0] = fitness[0];
 	for (int i = 1; i < size; i++) {
 		thresholds[i] = thresholds[i - 1] + fitness[i];
 	}
 	
-	for (int i = 0; i < size; i++) {
+	for (int i = elitism; i < size; i++) {
 		double ball = ((double)rand() / (RAND_MAX + 1.0)) * thresholds[size - 1];
 		for (int j = 0; j < size; j++) {
 			if (ball < thresholds[j]) {
@@ -175,7 +174,7 @@ void Population::crossover()
 	srand(time(NULL));
 	//one point crossover
 
-	for (int i = 0; i < size ; i+=2){
+	for (int i = elitism; i < size ; i+=2){
 		//probability
 
 		//std::cout << "NOWE OSOBNIKI" << std::endl;
@@ -196,46 +195,14 @@ void Population::crossover()
 void Population::mutation()
 {
 	srand(time(NULL));
-	for (int i = 0; i < size; i++) {
-		for (int j = 1; j < individualSize; j++)
-		{
-			if ((double)rand() / RAND_MAX < mutationProbability) {
-				int ind1 = j;
-				int ind2 = rand() % (individualSize - 1) + 1;
-
-				
-				if (ind2 > ind1) {
-					int bufor = ind2;
-					ind2 = ind1;
-					ind1 = bufor;
-				}
-
-				if (ind1 - ind2 == 1) {
-					next[i]->cost -= matrix->cost(next[i]->path[ind2], next[i]->path[ind1]);
-					next[i]->cost += matrix->cost(next[i]->path[ind1], next[i]->path[ind2]);
-
-				}
-				else {
-					next[i]->cost -= matrix->cost(next[i]->path[ind1 - 1], next[i]->path[ind1]);
-					next[i]->cost -= matrix->cost(next[i]->path[ind2], next[i]->path[ind2 + 1]);
-					next[i]->cost += matrix->cost(next[i]->path[ind1 - 1], next[i]->path[ind2]);
-					next[i]->cost += matrix->cost(next[i]->path[ind1], next[i]->path[ind2 + 1]);
-				}
-
-				next[i]->cost -= matrix->cost(next[i]->path[ind2 - 1], next[i]->path[ind2]);
-				next[i]->cost += matrix->cost(next[i]->path[ind2 - 1], next[i]->path[ind1]);
-				next[i]->cost -= matrix->cost(next[i]->path[ind1], next[i]->path[ind1 + 1]);
-				next[i]->cost += matrix->cost(next[i]->path[ind2], next[i]->path[ind1 + 1]);
-
-				Individual::swap(next[i]->path, ind1, ind2);
-			}
-		}
+	for (int i = elitism; i < size; i++) {
+		mutator->mutate(next[i]);
 	}
 }
 
 void Population::succesion()
 {
-	for (int i = 0; i < size; i++) {
+	for (int i = elitism; i < size; i++) {
 		delete main[i];
 		for (int j = i; j > -1; j--) {
 			if (j == 0) {
@@ -261,18 +228,24 @@ Individual * Population::getBestIndividual()
 	return bestIndividual;
 }
 
-Population::Population(int size, Matrix* matrix)
+Population::Population(Matrix* matrix, int size, int eliteSize, double crossProbability, double mutationProbability,  CrossoverOperator* crosser)
 {
-	this->crosser = new TwoPointOrderCross(matrix);
 	this->matrix = matrix;
 	this->size = size;
+	this->elitism = eliteSize;
+	this->crossProbability = crossProbability;
+	this->mutationProbability = mutationProbability;
 	this->main = new Individual*[size];
 	this->next = new Individual*[size];
 	this->matingPool = new Individual*[size];
 	this->fitness = new double[size];
 	this->individualSize = matrix->vertices;
-	
-
+	this->mutator = new swapMutator(matrix, mutationProbability);
+	if (crosser == NULL)
+		this->crosser = new LinearOrderCrossover(matrix);
+	else
+		this->crosser = crosser;
+	//generateRandomPopulation();
 	generateNNPopulation();
 }
 

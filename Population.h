@@ -1,15 +1,20 @@
 #pragma once
 #include "Individual.h"
 #include "CrossoverOperator.h"
+#include "Mutator.h"
 #include <math.h>
 
 class Population
 {
 	double crossProbability = 0.75;
-	double mutationProbability = 0.02;
+	double mutationProbability = 0.03;
+	int elitism = 2;
+
+
 
 	Individual* bestIndividual;
 	CrossoverOperator* crosser;
+	Mutator* mutator;
 	
 	int size;
 	int individualSize;
@@ -31,7 +36,7 @@ public:
 	void mutation();
 	void succesion();
 	Individual* getBestIndividual();
-	Population(int size, Matrix* matrix);
+	Population(Matrix* matrix, int size, int eliteSize,double crossProbability, double mutationProbability, CrossoverOperator* crosser = NULL);
 	~Population(); 
 };
 
