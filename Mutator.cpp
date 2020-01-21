@@ -110,6 +110,10 @@ swapMutator::swapMutator(Matrix * m, double mutationProbability)
 {
 }
 
+swapMutator::~swapMutator()
+{
+}
+
 void insertMutator::mutate(Individual * individual, double probability)
 {
 }
@@ -118,4 +122,8 @@ insertMutator::insertMutator(Matrix * m, double mutationProbability)
 	: Mutator::Mutator(m,mutationProbability)
 {
 
+}
+
+insertMutator::~insertMutator()
+{
 }

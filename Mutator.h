@@ -10,7 +10,7 @@ protected:
 public:
 	virtual void mutate(Individual* individual, double probability = -1) = 0;
 	Mutator(Matrix* m, double mutationProbability);
-	virtual ~Mutator();
+	~Mutator();
 };
 
 
@@ -20,6 +20,7 @@ class swapMutator
 public:
 	void mutate(Individual* individual, double probability = -1) override;
 	swapMutator(Matrix* m, double mutationProbability);
+	~swapMutator();
 };
 
 
@@ -29,4 +30,5 @@ class insertMutator
 public:
 	void mutate(Individual* individual, double probability = -1) override;
 	insertMutator(Matrix* m, double mutationProbability);
+	~insertMutator();
 };

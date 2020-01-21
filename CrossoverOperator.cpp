@@ -75,6 +75,7 @@ CrossoverOperator::CrossoverOperator(Matrix* matrix)
 
 CrossoverOperator::~CrossoverOperator()
 {
+	
 }
 
 
@@ -608,7 +609,20 @@ void EdgeCrossover::cross(Individual * parent1, Individual * parent2)
 	child1->print();
 	child2->print();*/
 
-	delete[] left, commonLeft, visited, helper, commonEdges, edges;
+	/*for (int i = 0; i < m->vertices; i++) {
+		commonEdges[i].clear();
+		commonEdges[i].~list();
+		edges[i].clear();
+		edges[i].~list();
+	}*/
+	
+	delete[] path;
+	delete[] left;
+	delete[] commonLeft;
+	delete[] visited;
+	delete[] helper;
+	delete[] commonEdges;
+	delete[] edges;
 }
 
 EdgeCrossover::EdgeCrossover(Matrix * matrix)

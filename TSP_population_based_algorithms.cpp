@@ -31,6 +31,7 @@ void menu() {
 	double crossProbability = 0.75;
 	double mutationProbability = 0.01;
 	int crossType = CrossoverOperator::LINEAR_ORDER;
+	int selectorType = Selector::ROULLETE;
 	int populationSize = 40;
 	int eliteSize = 4;
 	int generations = 1000;
@@ -48,7 +49,7 @@ void menu() {
 			"\n2.Zmien prawdopodobienstwo krzyzowania | " << crossProbability <<
 			"\n3.Zmien prawdopodobienstwo mutacji | " << mutationProbability <<
 			"\n4.Zmien metodę krzyzowania" << crossType<<
-			"\n5.Zmien metodę mutacji" << 
+			"\n5.Zmien metodę selekcji" << 
 			"\n6.Zmien wielkosc elity | " << eliteSize <<
 			"\n7.Zmien wielkosc populacji | " << populationSize <<
 			"\n8.Zmien ilosc pokolen | " << generations <<
@@ -74,7 +75,7 @@ void menu() {
 			crossType = CrossoverOperator::crossoverMenu();
 			break;
 		case '5':
-			//mutationType = Mutator::mutationMenu();
+			selectorType = Selector::selectorMenu();
 			break;
 		case '6':
 			cout << "Podaj wielkosc elity:\n";
@@ -90,7 +91,7 @@ void menu() {
 			break;
 		case '9':	
 			ga = new GeneticAlgorithm(matrix, populationSize, eliteSize, generations, crossProbability,
-									mutationProbability,CrossoverOperator::newCrossoverOperatorPtr(crossType,matrix));
+				mutationProbability, CrossoverOperator::newCrossoverOperatorPtr(crossType, matrix), Selector::newSelectorPtr(selectorType));
 			//Timing timer;
 			//timer.startCount();
 			ga->algorithm();

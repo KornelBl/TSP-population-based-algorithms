@@ -13,7 +13,8 @@ class GeneticAlgorithm
 public:
 	void algorithm();
 	void showResult();
-	GeneticAlgorithm(Matrix* m,int populationSize,int eliteSize,int generations, double crossProbability, double mutationProbability, CrossoverOperator* crosser = NULL);
+	GeneticAlgorithm(Matrix* m,int populationSize,int eliteSize,int generations, double crossProbability,
+	double mutationProbability, CrossoverOperator* crosser = NULL, Selector* selector = NULL);
 	~GeneticAlgorithm();
 };
 

@@ -2,6 +2,7 @@
 #include "Individual.h"
 #include "CrossoverOperator.h"
 #include "Mutator.h"
+#include "Selector.h"
 #include <math.h>
 
 class Population
@@ -15,7 +16,9 @@ class Population
 	Individual* bestIndividual;
 	CrossoverOperator* crosser;
 	Mutator* mutator;
-	
+	Selector* selector;
+
+
 	int size;
 	int individualSize;
 	Matrix* matrix;
@@ -36,7 +39,7 @@ public:
 	void mutation();
 	void succesion();
 	Individual* getBestIndividual();
-	Population(Matrix* matrix, int size, int eliteSize,double crossProbability, double mutationProbability, CrossoverOperator* crosser = NULL);
+	Population(Matrix* matrix, int size, int eliteSize,double crossProbability, double mutationProbability, CrossoverOperator* crosser = NULL, Selector* selector = NULL);
 	~Population(); 
 };
 

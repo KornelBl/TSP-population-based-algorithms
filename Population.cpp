@@ -150,23 +150,8 @@ void Population::evaluation()
 
 void Population::selection()
 {
-	//roulette
-	double* thresholds = new double[size];
-	thresholds[0] = fitness[0];
-	for (int i = 1; i < size; i++) {
-		thresholds[i] = thresholds[i - 1] + fitness[i];
-	}
-	
-	for (int i = elitism; i < size; i++) {
-		double ball = ((double)rand() / (RAND_MAX + 1.0)) * thresholds[size - 1];
-		for (int j = 0; j < size; j++) {
-			if (ball < thresholds[j]) {
-				matingPool[i] = main[j];
-				break;
-			}
-		}
-	}
-	delete[] thresholds;
+	delete[] matingPool;
+	matingPool = selector->selectMatingPool(main, fitness, size);
 }
 
 void Population::crossover()
@@ -228,7 +213,7 @@ Individual * Population::getBestIndividual()
 	return bestIndividual;
 }
 
-Population::Population(Matrix* matrix, int size, int eliteSize, double crossProbability, double mutationProbability,  CrossoverOperator* crosser)
+Population::Population(Matrix* matrix, int size, int eliteSize, double crossProbability, double mutationProbability,  CrossoverOperator* crosser, Selector* selector)
 {
 	this->matrix = matrix;
 	this->size = size;
@@ -245,8 +230,9 @@ Population::Population(Matrix* matrix, int size, int eliteSize, double crossProb
 		this->crosser = new LinearOrderCrossover(matrix);
 	else
 		this->crosser = crosser;
-	//generateRandomPopulation();
-	generateNNPopulation();
+	this->selector = selector;
+	generateRandomPopulation();
+	//generateNNPopulation();
 }
 
 Population::~Population()
@@ -254,7 +240,16 @@ Population::~Population()
 	for (int i = 0; i < size; i++) {
 		delete main[i];
 	}
-	delete[] main, next, matingPool, fitness;
+	delete[] main;
+	delete[] next;
+	delete[] matingPool;
+	delete[] fitness;
 
-	delete bestIndividual, crosser;
+	delete bestIndividual;
+	delete crosser;
+	delete mutator;
+	delete selector;
+
+
+
 }

@@ -27,16 +27,18 @@ void GeneticAlgorithm::showResult()
 	std::cout << "0\nKoszt: " << bestIndividual->getCost() << std::endl;
 }
 
-GeneticAlgorithm::GeneticAlgorithm(Matrix* m, int populationSize, int eliteSize, int generations, double crossProbability, double mutationProbability, CrossoverOperator* crosser)
+GeneticAlgorithm::GeneticAlgorithm(Matrix* m, int populationSize, int eliteSize, int generations,
+	double crossProbability, double mutationProbability, CrossoverOperator* crosser, Selector* selector)
 {
 	matrix = m;
 	this->generations = generations;
 	//generate new population
-	population = new Population(matrix,populationSize,eliteSize,crossProbability,mutationProbability, crosser);
+	population = new Population(matrix,populationSize,eliteSize,crossProbability,mutationProbability, crosser, selector);
 }
 
 
 GeneticAlgorithm::~GeneticAlgorithm()
 {
-	delete bestIndividual, population;
+	delete bestIndividual;
+	delete population;
 }
