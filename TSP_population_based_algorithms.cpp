@@ -5,22 +5,74 @@
 #include <iostream>
 #include <conio.h>
 #include "GeneticAlgorithm.h"
+#include "Timing.h"
+#include <fstream>
 using namespace std;
 
 
 void menu();
-
+//void research();
 
 int main()
 {
-	//dodac destruktory
+
 	srand(time(NULL));
 	menu();
-	Matrix* matrix = new Matrix;
-	matrix->readFromFile("data17.txt");
-
-	delete matrix;
 }
+
+
+//void research() {
+//	std::string fileName = "DP22.csv";
+//	Matrix* matrix = new Matrix;
+//	ofstream file;
+//	double result, timeResult;
+//	Timing counter;
+//	string data[8] = { "17","34","45","56","70","100","171","323" };
+//
+//	int populationSize = 50;
+//	int eliteSize = 4;
+//	int generations = 1000;
+//	double crossProb = 0.80;
+//	double mutProb = 0.02;
+//	int crosser = 3;
+//	int selector = 0;
+//	int startPath = 1;
+//
+//	int popTab[6] = { 0, 2, 4, 6, 8, 10};
+//
+//	fileName = "eliteSize.csv";
+//
+//	file.open(fileName, ios_base::out);
+//	for (int i = 0; i < 8; i++) {
+//		matrix->readFromFile("data" + data[i] + ".txt");
+//		file << data[i] << ";";
+//		for (int k = 0; k < 6; k++) {
+//			result = 0;
+//			timeResult = 0;
+//
+//			eliteSize = popTab[k];
+//			for (int j = 0; j < 20; j++) {
+//				//ga
+//				GeneticAlgorithm ga(matrix,populationSize,eliteSize,generations,crossProb,mutProb,CrossoverOperator::newCrossoverOperatorPtr(crosser,matrix),Selector::newSelectorPtr(selector),startPath);
+//				counter.startCount();
+//				//mierzony czas
+//				ga.algorithm();
+//				counter.endCount();
+//				result += ga.getBestCost();
+//				timeResult += counter.getResult() / 20;
+//				std::cout << i << ", " << j << endl;
+//			}
+//			file << k << ";" << result / 20 << ";" << timeResult << ";";
+//		}
+//		file << endl;
+//	}
+//	file.close();
+//
+//	delete matrix;
+//}
+
+
+
 
 
 
@@ -92,12 +144,12 @@ void menu() {
 		case '9':	
 			ga = new GeneticAlgorithm(matrix, populationSize, eliteSize, generations, crossProbability,
 				mutationProbability, CrossoverOperator::newCrossoverOperatorPtr(crossType, matrix), Selector::newSelectorPtr(selectorType));
-			//Timing timer;
-			//timer.startCount();
+			Timing timer;
+			timer.startCount();
 			ga->algorithm();
-			//timer.endCount();
+			timer.endCount();
 			ga->showResult();
-			//cout << endl << "Czas: " << timer.getResult() / 1000 << " ms";
+			cout << endl << "Czas: " << timer.getResult() / 1000 << " ms";
 			_getch();
 			delete ga;
 			break;

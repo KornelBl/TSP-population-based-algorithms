@@ -13,6 +13,7 @@ public:
 	static const int LINEAR_ORDER = 1;
 	static const int CYCLE = 2;
 	static const int EDGE = 3;
+	static const int IMP_EDGE = 4;
 
 
 	static int crossoverMenu();
@@ -67,4 +68,15 @@ public:
 	void cross(Individual* parent1, Individual* parent2) override;
 	EdgeCrossover(Matrix* matrix);
 	~EdgeCrossover() override;
+};
+
+
+class ImprovedEdgeCrossover
+	: public CrossoverOperator
+{
+
+public:
+	void cross(Individual* parent1, Individual* parent2) override;
+	ImprovedEdgeCrossover(Matrix* matrix);
+	~ImprovedEdgeCrossover() override;
 };

@@ -15,7 +15,7 @@ int CrossoverOperator::crossoverMenu()
 			"\n2.Two point linear" <<
 			"\n3.Cycle" <<
 			"\n4.Edge" <<
-			//"\n4.Zmien metodê krzyzowania" <<
+			"\n5.polepszony niby edge" <<
 			"\n[Esc] Koniec\n";
 		fflush(stdin);
 		h = _getch();
@@ -31,6 +31,9 @@ int CrossoverOperator::crossoverMenu()
 			break;
 		case '4':
 			return EDGE;
+			break;
+		case '5':
+			return IMP_EDGE;
 			break;
 		}
 	} while (h != 27);
@@ -51,6 +54,9 @@ CrossoverOperator* CrossoverOperator::newCrossoverOperatorPtr(int crossType, Mat
 		break;
 	case 3:
 		return new EdgeCrossover(matrix);
+		break;
+	case 4:
+		return new ImprovedEdgeCrossover(matrix);
 		break;
 	default:
 		return new LinearOrderCrossover(matrix);
@@ -293,7 +299,9 @@ void CycleCross::cross(Individual * parent1, Individual * parent2)
 	child1->print();
 	child2->print();*/
 
-	delete[] filledPos, position1, position2;
+	delete[] filledPos;
+	delete[] position1;
+	delete[] position2;
 }
 
 CycleCross::CycleCross(Matrix * matrix)
@@ -391,6 +399,7 @@ void EdgeCrossover::cross(Individual * parent1, Individual * parent2)
 	int first = rand() % m->vertices;
 	path[0] = path[m->vertices] = first;
 	visited[first] = 1;
+	//
 	Individual::swap(helper, first, m->vertices - 1);
 	for (int val : edges[first]) {
 		left[val]--;
@@ -632,5 +641,349 @@ EdgeCrossover::EdgeCrossover(Matrix * matrix)
 }
 
 EdgeCrossover::~EdgeCrossover()
+{
+}
+
+
+void ImprovedEdgeCrossover::cross(Individual * parent1, Individual * parent2)
+{
+	std::list<int>* commonEdges = new std::list<int>[m->vertices];
+	std::list<int>* edges = new std::list<int>[m->vertices];
+	int* helper = new int[m->vertices];
+
+
+	edges[0].push_front(parent1->path[1]);
+	edges[0].push_front(parent1->path[m->vertices - 1]);
+	//dodawanie do listy krawedzi pierwszego rodzica
+	for (int i = 1; i < m->vertices; i++) {
+		edges[parent1->path[i]].push_front(parent1->path[i + 1]);
+		edges[parent1->path[i]].push_front(parent1->path[i - 1]);
+	}
+	//dodawanie drugiego rodzica
+	bool prevSame = false;
+	bool nextSame = false;
+	for (auto it = edges[0].cbegin(); it != edges[0].cend();) {
+		if (*it == parent2->path[m->vertices - 1]) {
+			it = edges[0].erase(it);
+			commonEdges[0].push_front(parent2->path[m->vertices - 1]);
+			prevSame = true;
+			continue;
+		}
+		if (*it == parent2->path[1]) {
+			it = edges[0].erase(it);
+			commonEdges[0].push_front(parent2->path[1]);
+			nextSame = true;
+			continue;
+		}
+		++it;
+	}
+	if (!nextSame)
+		edges[0].push_front(parent2->path[1]);
+	else
+		nextSame = false;
+	if (!prevSame)
+		edges[0].push_front(parent2->path[m->vertices - 1]);
+	else
+		prevSame = false;
+
+	for (int i = 1; i < m->vertices; i++) {
+		for (auto it = edges[parent2->path[i]].cbegin(); it != edges[parent2->path[i]].cend();) {
+			if (*it == parent2->path[i - 1]) {
+				it = edges[parent2->path[i]].erase(it);
+				commonEdges[parent2->path[i]].push_front(parent2->path[i - 1]);
+				prevSame = true;
+				continue;
+			}
+			if (*it == parent2->path[i + 1]) {
+				it = edges[parent2->path[i]].erase(it);
+				commonEdges[parent2->path[i]].push_front(parent2->path[i + 1]);
+				nextSame = true;
+				continue;
+			}
+			++it;
+		}
+		if (!nextSame)
+			edges[parent2->path[i]].push_front(parent2->path[i + 1]);
+		else
+			nextSame = false;
+		if (!prevSame)
+			edges[parent2->path[i]].push_front(parent2->path[i - 1]);
+		else
+			prevSame = false;
+	}
+	
+	std::list<int>* commonEdges2 = new std::list<int>[m->vertices];
+	std::list<int>* edges2 = new std::list<int>[m->vertices];
+
+	for (int i = 0; i < m->vertices; i++) {
+		commonEdges2[i].assign(commonEdges[i].begin(), commonEdges[i].end());
+		edges2[i].assign(edges[i].begin(), edges[i].end());
+	}
+
+	//przygotowanie do first child
+	for (int i = 0; i < m->vertices; i++) {
+		helper[i] = i;
+	}
+
+
+	//child1
+	int* path = new int[m->vertices + 1];
+	int zeroAt;
+
+
+	int first = rand() % m->vertices;
+	path[0] = path[m->vertices] = first;
+
+	Individual::swap(helper, first, m->vertices - 1);
+
+	//usuniecie z innych list first
+	for (int val : commonEdges[first]) {
+		for (auto it = commonEdges[val].cbegin(); it != commonEdges[val].cend(); it++) {
+			if (*it == first) {
+				commonEdges[val].erase(it);
+				break;
+			}
+		}
+	}
+	for (int val : edges[first]) {
+		for (auto it = edges[val].cbegin(); it != edges[val].cend(); it++) {
+			if (*it == first) {
+				edges[val].erase(it);
+				break;
+			}
+		}
+	}
+
+
+
+	if (first == 0)zeroAt = 0;
+	for (int i = 1; i < m->vertices; i++) {
+		int next;
+		int nextEdgeNumber = INT_MAX;
+		int modulo;
+		int index;
+		if (!commonEdges[path[i-1]].empty()) {
+			//porownujemy wierzhcolki z commonedges
+			for (int val : commonEdges[path[i - 1]]) {
+				int edgeNumber = commonEdges[val].size() + edges[val].size();
+				if (edgeNumber < nextEdgeNumber) {
+					next = val;
+					nextEdgeNumber = edgeNumber;
+					modulo = 1;
+				}
+				else if (edgeNumber == nextEdgeNumber) {
+					modulo++;
+					if (rand() % modulo == 1) {
+						next = val;
+						nextEdgeNumber = edgeNumber;
+					}
+				}
+			}
+			index = next;
+		}
+		else if (!edges[path[i - 1]].empty()) {
+			//porownujemy wierzcholki z edges
+			for (int val : edges[path[i - 1]]) {
+				int edgeNumber = edges[val].size() + commonEdges[val].size();
+				if (edgeNumber < nextEdgeNumber) {
+					next = val;
+					nextEdgeNumber = edgeNumber;
+					modulo = 1;
+				}
+				else if (edgeNumber == nextEdgeNumber) {
+					modulo++;
+					if (rand() % modulo == 1) {
+						next = val;
+						nextEdgeNumber = edgeNumber;
+					}
+				}
+			}
+			index = next;
+		}
+		else {
+			// losujemy jeden z nieodwiedzonych wierzcholkow
+			index = rand() % (m->vertices - i);
+			next = helper[index];
+		}
+
+		if (next == 0)
+			zeroAt = i;
+		path[i] = next;
+		//usuwanie z kolegów
+		for (int val : commonEdges[path[i]]) {
+			for (auto it = commonEdges[val].cbegin(); it != commonEdges[val].cend();it++) {
+				if (*it == path[i]) {
+					commonEdges[val].erase(it);
+					break;
+				}
+			}
+		}
+		for (int val : edges[path[i]]) {
+			for (auto it = edges[val].cbegin(); it != edges[val].cend(); it++) {
+				if (*it == path[i]) {
+					edges[val].erase(it);
+					break;
+				}
+			}
+		}
+
+		//swap w helperze
+		while (helper[index] != next) {
+			index = helper[index];
+		}
+		Individual::swap(helper, index, m->vertices - i - 1);
+	}
+	int* realPath = new int[m->vertices + 1];
+	realPath[0] = realPath[m->vertices] = 0;
+
+	for (int i = 1; i < m->vertices; i++) {
+		if (zeroAt == m->vertices - 1)
+			zeroAt = 0;
+		else
+			zeroAt++;
+		realPath[i] = path[zeroAt];
+	}
+
+
+	child1 = new Individual(realPath, m->distanceFunction(realPath), m->vertices);
+
+
+	//przygotowanie do first child
+	for (int i = 0; i < m->vertices; i++) {
+		helper[i] = i;
+	}
+
+
+	//child2
+
+	first = rand() % m->vertices;
+	path[0] = path[m->vertices] = first;
+
+	Individual::swap(helper, first, m->vertices - 1);
+
+	//usuniecie z innych list first
+	for (int val : commonEdges2[first]) {
+		for (auto it = commonEdges2[val].cbegin(); it != commonEdges2[val].cend(); it++) {
+			if (*it == first) {
+				commonEdges2[val].erase(it);
+				break;
+			}
+		}
+	}
+	for (int val : edges2[first]) {
+		for (auto it = edges2[val].cbegin(); it != edges2[val].cend(); it++) {
+			if (*it == first) {
+				edges2[val].erase(it);
+				break;
+			}
+		}
+	}
+
+	if (first == 0)zeroAt = 0;
+	for (int i = 1; i < m->vertices; i++) {
+		int next;
+		int nextEdgeNumber = INT_MAX;
+		int modulo;
+		int index;
+		if (!commonEdges2[path[i - 1]].empty()) {
+			//porownujemy wierzhcolki z commonedges2
+			for (int val : commonEdges2[path[i - 1]]) {
+				int edgeNumber = commonEdges2[val].size() + edges2[val].size();
+				if (edgeNumber < nextEdgeNumber) {
+					next = val;
+					nextEdgeNumber = edgeNumber;
+					modulo = 1;
+				}
+				else if (edgeNumber == nextEdgeNumber) {
+					modulo++;
+					if (rand() % modulo == 1) {
+						next = val;
+						nextEdgeNumber = edgeNumber;
+					}
+				}
+			}
+			index = next;
+		}
+		else if (!edges2[path[i - 1]].empty()) {
+			//porownujemy wierzcholki z edges2
+			for (int val : edges2[path[i - 1]]) {
+				int edgeNumber = edges2[val].size() + commonEdges2[val].size();
+				if (edgeNumber < nextEdgeNumber) {
+					next = val;
+					nextEdgeNumber = edgeNumber;
+					modulo = 1;
+				}
+				else if (edgeNumber == nextEdgeNumber) {
+					modulo++;
+					if (rand() % modulo == 1) {
+						next = val;
+						nextEdgeNumber = edgeNumber;
+					}
+				}
+			}
+			index = next;
+		}
+		else {
+			// losujemy jeden z nieodwiedzonych wierzcholkow
+			index = rand() % (m->vertices - i);
+			next = helper[index];
+		}
+
+		if (next == 0)
+			zeroAt = i;
+		path[i] = next;
+		//usuwanie z kolegów
+		for (int val : commonEdges2[path[i]]) {
+			for (auto it = commonEdges2[val].cbegin(); it != commonEdges2[val].cend(); it++) {
+				if (*it == path[i]) {
+					commonEdges2[val].erase(it);
+					break;
+				}
+			}
+		}
+		for (int val : edges2[path[i]]) {
+			for (auto it = edges2[val].cbegin(); it != edges2[val].cend(); it++) {
+				if (*it == path[i]) {
+					edges2[val].erase(it);
+					break;
+				}
+			}
+		}
+
+		//swap w helperze
+		while (helper[index] != next) {
+			index = helper[index];
+		}
+		Individual::swap(helper, index, m->vertices - i - 1);
+	}
+	int* realPath2 = new int[m->vertices + 1];
+	realPath2[0] = realPath2[m->vertices] = 0;
+
+	for (int i = 1; i < m->vertices; i++) {
+		if (zeroAt == m->vertices - 1)
+			zeroAt = 0;
+		else
+			zeroAt++;
+		realPath2[i] = path[zeroAt];
+	}
+
+
+	child2 = new Individual(realPath2, m->distanceFunction(realPath2), m->vertices);
+
+	delete[] helper;
+	delete[] edges;
+	delete[] edges2;
+	delete[] commonEdges;
+	delete[] commonEdges2;
+	delete[] path;
+}
+
+ImprovedEdgeCrossover::ImprovedEdgeCrossover(Matrix * matrix)
+	: CrossoverOperator(matrix)
+{
+
+}
+
+ImprovedEdgeCrossover::~ImprovedEdgeCrossover()
 {
 }

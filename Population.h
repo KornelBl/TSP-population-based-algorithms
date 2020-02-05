@@ -39,7 +39,7 @@ public:
 	void mutation();
 	void succesion();
 	Individual* getBestIndividual();
-	Population(Matrix* matrix, int size, int eliteSize,double crossProbability, double mutationProbability, CrossoverOperator* crosser = NULL, Selector* selector = NULL);
+	Population(Matrix* matrix, int size, int eliteSize,double crossProbability, double mutationProbability, CrossoverOperator* crosser , Selector* selector = NULL,int startPath = 0);
 	~Population(); 
 };
 

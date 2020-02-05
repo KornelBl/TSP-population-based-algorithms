@@ -116,7 +116,9 @@ void Population::generateNNPopulation()
 
 	bestIndividual = new Individual(main[0]);
 
-	delete[] helper,visited,order;
+	delete[] helper;
+	delete[] visited;
+	delete[] order;
 
 }
 
@@ -179,7 +181,6 @@ void Population::crossover()
 
 void Population::mutation()
 {
-	srand(time(NULL));
 	for (int i = elitism; i < size; i++) {
 		mutator->mutate(next[i]);
 	}
@@ -213,7 +214,7 @@ Individual * Population::getBestIndividual()
 	return bestIndividual;
 }
 
-Population::Population(Matrix* matrix, int size, int eliteSize, double crossProbability, double mutationProbability,  CrossoverOperator* crosser, Selector* selector)
+Population::Population(Matrix* matrix, int size, int eliteSize, double crossProbability, double mutationProbability,  CrossoverOperator* crosser, Selector* selector,int startPath)
 {
 	this->matrix = matrix;
 	this->size = size;
@@ -226,13 +227,13 @@ Population::Population(Matrix* matrix, int size, int eliteSize, double crossProb
 	this->fitness = new double[size];
 	this->individualSize = matrix->vertices;
 	this->mutator = new swapMutator(matrix, mutationProbability);
-	if (crosser == NULL)
-		this->crosser = new LinearOrderCrossover(matrix);
-	else
-		this->crosser = crosser;
+	this->crosser = crosser;
 	this->selector = selector;
-	generateRandomPopulation();
-	//generateNNPopulation();
+
+	if(startPath == 0)
+		generateRandomPopulation();
+	else 
+		generateNNPopulation();
 }
 
 Population::~Population()
@@ -249,7 +250,4 @@ Population::~Population()
 	delete crosser;
 	delete mutator;
 	delete selector;
-
-
-
 }

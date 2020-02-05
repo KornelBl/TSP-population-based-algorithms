@@ -13,8 +13,9 @@ class GeneticAlgorithm
 public:
 	void algorithm();
 	void showResult();
+	int getBestCost();
 	GeneticAlgorithm(Matrix* m,int populationSize,int eliteSize,int generations, double crossProbability,
-	double mutationProbability, CrossoverOperator* crosser = NULL, Selector* selector = NULL);
+	double mutationProbability, CrossoverOperator* crosser, Selector* selector = NULL,int startPath = 0);
 	~GeneticAlgorithm();
 };
 
